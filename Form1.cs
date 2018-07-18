@@ -9,40 +9,45 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 
-
-namespace GTCA___Text_Decrypt
+namespace GTCA_Encrypt
 {
     public partial class Form1 : Form
-    { string Contents = "";
-
-
+    {
+       
         public Form1()
         {
             InitializeComponent();
         }
 
+       
+
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-
-            if (openFile.ShowDialog() == DialogResult.OK)
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                //string variable to hold the text file
+                string Contents = "";
 
                 //Opens a file
-                FileStream InputFile = File.Open(openFile.FileName, FileMode.Open);
+                FileStream InputFile = File.Open(openFileDialog1.FileName, FileMode.Open);
 
 
-                //Reads file
+                //Reads file until the end
                 while (InputFile.Position < InputFile.Length)
                 {
+
                     char chrLetter = (char)InputFile.ReadByte();
                     Contents += chrLetter.ToString();
-
+                    
+                    //Enables the encrypt button once the textbox is populated
+                    button1.Enabled = true;
                 }
-
-                filetextBox.Text = Contents.ToString();
-
+                //displays text file to textbox
+                textBox1.Text = Contents.ToString();
+                //Close the file
                 InputFile.Close();
+
             }
         }
 
@@ -50,53 +55,65 @@ namespace GTCA___Text_Decrypt
         {
             try
             {
-                
-                string DecryptedString = "";
-                int pk;
 
-                string[] lines = File.ReadAllLines(openFile.FileName);
-                string firstline = lines[0].ToString();
+                long Key = 0;
 
+                //Variable to hold text file
+                string EncryptedString = "";
 
-                textBox1.Text = firstline;
-                pk = Int32.Parse(textBox1.Text);
-                filetextBox.Text = Contents.Remove(0, 15);
+                //Random object to generate random numbers for key
+                Random rand = new Random();
 
-                string otherLines = lines[1].ToString();
+                Key = rand.Next(1, 2 ^ 47);
 
-
-                //Encryption
-                foreach (char letter in otherLines)
+                //Encryption loop
+                foreach (char letter in textBox1.Text)
                 {
-                    char DecryptedLetter = (char)(letter - pk);
-                    DecryptedString += DecryptedLetter.ToString();
+                    char EncryptedLetter = (char)(letter + Key);
+                    EncryptedString += EncryptedLetter.ToString();
 
                 }
 
-                filetextBox.Text = DecryptedString;
-                messageLabel.Visible = true;
+                //Populates textbox
+                textBox1.Text = Key + "\r\n" + EncryptedString;
                 button1.Enabled = false;
+
+
             }
             catch
             {
-                MessageBox.Show("Nothing to decrypt!" + "\r\n" + "Please upload a file first.");
+                //Handles exceptions
+                MessageBox.Show("Please upload a text file first.");
             }
         }
 
-            private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+       
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //saveFile.ShowDialog();
+
+            //StreamWriter outputFile;
+
+            if (saveFile.ShowDialog() == DialogResult.OK)
             {
-                saveFile.ShowDialog();
 
-                //StreamWriter outputFile;
-
-                if (saveFile.ShowDialog() == DialogResult.OK)
-                {
-                    StreamWriter writer = new StreamWriter(saveFile.FileName);
-                    writer.Write(filetextBox.Text);
-                    writer.Close();
-                }
+                StreamWriter writer = new StreamWriter(saveFile.FileName);
+                writer.Write(textBox1.Text);
+                writer.Close();
             }
-        
-     
-    }   
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            textBox1.Text = "";
+            button1.Enabled = true;
+        }
+
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+    }
 }
