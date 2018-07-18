@@ -1,0 +1,102 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+
+namespace GTCA___Text_Decrypt
+{
+    public partial class Form1 : Form
+    { string Contents = "";
+
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+
+                //Opens a file
+                FileStream InputFile = File.Open(openFile.FileName, FileMode.Open);
+
+
+                //Reads file
+                while (InputFile.Position < InputFile.Length)
+                {
+                    char chrLetter = (char)InputFile.ReadByte();
+                    Contents += chrLetter.ToString();
+
+                }
+
+                filetextBox.Text = Contents.ToString();
+
+                InputFile.Close();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                
+                string DecryptedString = "";
+                int pk;
+
+                string[] lines = File.ReadAllLines(openFile.FileName);
+                string firstline = lines[0].ToString();
+
+
+                textBox1.Text = firstline;
+                pk = Int32.Parse(textBox1.Text);
+                filetextBox.Text = Contents.Remove(0, 15);
+
+                string otherLines = lines[1].ToString();
+
+
+                //Encryption
+                foreach (char letter in otherLines)
+                {
+                    char DecryptedLetter = (char)(letter - pk);
+                    DecryptedString += DecryptedLetter.ToString();
+
+                }
+
+                filetextBox.Text = DecryptedString;
+                messageLabel.Visible = true;
+                button1.Enabled = false;
+            }
+            catch
+            {
+                MessageBox.Show("Nothing to decrypt!" + "\r\n" + "Please upload a file first.");
+            }
+        }
+
+            private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+            {
+                saveFile.ShowDialog();
+
+                //StreamWriter outputFile;
+
+                if (saveFile.ShowDialog() == DialogResult.OK)
+                {
+                    StreamWriter writer = new StreamWriter(saveFile.FileName);
+                    writer.Write(filetextBox.Text);
+                    writer.Close();
+                }
+            }
+        
+     
+    }   
+}
